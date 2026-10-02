@@ -2,6 +2,9 @@
 .env
 .env.*
 
+# Local runtime data (sprint-goal status written by the app)
+data/goal_status.json
+
 # Byte-compiled / cache
 __pycache__/
 *.py[cod]
