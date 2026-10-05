@@ -1,0 +1,7 @@
+---
+description: Fetch and format active-sprint issues from the Jira Cloud API
+globs:
+alwaysApply: true
+---
+
+Follow the instructions in `./instructions/fetch-jira-issues.agent.md` when you are asked to fetch or format issue data from the Jira API.

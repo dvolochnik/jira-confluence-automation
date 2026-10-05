@@ -4,14 +4,22 @@
 .gitignore
 PROJECT_IDEAS.md
 README.md
+REQUIREMENTS.md
+TODO.md
 backlog.md
 calculator.py
 hello.txt
 main.py
 project_spec.md
+reports/example.md
+reports/instructions.md
+reports/template.md
+requirements.txt
+work/module-08-report.md
+work/module-09-report.md
 
 ## Backlog Commit History
-
+a130b32 Record the sprint health backlog and status reports so the planned dashboard work is in version control.
 
 ## backlog.md Contents
 # Sprint Health Dashboard — Implementation Backlog
@@ -77,7 +85,7 @@ The contract is `project_spec.md`. Where a task and that file disagree, the spec
 
 ## Integration
 
-Live mode only. The health rules, page, and the goal-status file already exist and must not grow a second set of rules for Jira.
+Live mode only. The health rules, page, and goal-status file already exist and must not grow a second set of rules for Jira.
 
 - [ ] When `DATA_SOURCE=live`, require `JIRA_SITE_URL`, `JIRA_BOARD_ID`, `JIRA_EMAIL`, and `JIRA_API_TOKEN` before any HTTP call. If one is missing, name the variable on the page and do not include its value. Expect an HTTPS site URL with no trailing path beyond the host. Do not disable certificate checks.
 - [ ] Call Jira Cloud with basic auth (`JIRA_EMAIL` and `JIRA_API_TOKEN`) using GET only. Use the Agile API to read the board’s active sprint, then the issue search API for that sprint’s issues. Request summary, issue type, status, assignee, due date, story points, flag, and issue links. Do not request comments or attachments. Page the search internally until the sprint’s issues are loaded, then discard anything that is not in that sprint.

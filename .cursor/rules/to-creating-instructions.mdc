@@ -1,0 +1,7 @@
+---
+description: Create or update project instructions and their IDE wrappers
+globs:
+alwaysApply: true
+---
+
+Follow the instructions in `./instructions/creating-instructions.agent.md` when you are asked to create, update, or install instructions.
