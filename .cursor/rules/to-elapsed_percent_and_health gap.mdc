@@ -1,0 +1,7 @@
+---
+description: Calculate elapsed percent, the points-versus-time gap, and the health band
+globs:
+alwaysApply: true
+---
+
+Follow the instructions in `./instructions/elapsed_percent_and_health gap.agent.md` when you are asked to calculate elapsed percent, the points-versus-time gap, or the health band.

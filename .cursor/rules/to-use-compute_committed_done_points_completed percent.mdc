@@ -1,0 +1,7 @@
+---
+description: Compute committed points, done points, and completed percent
+globs:
+alwaysApply: true
+---
+
+Follow the instructions in `./instructions/use-compute_committed_done_points_completed percent.agent.md` when you are asked to compute committed points, done points, or completed percent.

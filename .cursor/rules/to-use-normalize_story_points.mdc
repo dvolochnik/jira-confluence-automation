@@ -1,0 +1,7 @@
+---
+description: Normalize and sum story points with tools/normalize_story_points.py
+globs:
+alwaysApply: true
+---
+
+Follow the instructions in `./instructions/use-normalize_story_points.agent.md` when you are asked to normalize story points.
