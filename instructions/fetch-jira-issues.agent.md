@@ -1,5 +1,6 @@
 - Fetch and format one Jira Cloud board's active sprint into the shared sprint model. Stop at that model. Do not compute health bands, render a page, or write goal status.
-- Run this only when `DATA_SOURCE` is `live`. When it is `sample` or unset, do not call Jira and do not read the Jira variables.
+- Run the live fetch only when `DATA_SOURCE` is `live`. When it is `sample`, do not call Jira and do not read the Jira variables.
+- When `DATA_SOURCE` is unset, the Jira source is missing. Do not call Jira and do not read the Jira variables. Propose the default source `sample` and wait for the user to accept it. Do not load sample data on your own.
 
 - **Input format.** Four environment variables, all required before any HTTP call:
   + `JIRA_SITE_URL` — HTTPS origin only, such as `https://example.atlassian.net`. No path after the host.

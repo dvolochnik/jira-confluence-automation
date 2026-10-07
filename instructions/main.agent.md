@@ -17,4 +17,4 @@ Each entry below is an instruction file with a one-line description. Optional su
 - [`./instructions/fetch-jira-issues.agent.md`](./fetch-jira-issues.agent.md) — Fetch and format one board's active sprint issues from the Jira Cloud API.
   + Keywords: Jira, Jira API, fetch issues, format issue data, live mode, active sprint
   + Target: `**/*jira*`, `app.py`
-  + Exceptions: does not apply in sample mode, and does not cover health bands, page rendering, or the goal-status file
+  + Exceptions: does not apply in sample mode; when `DATA_SOURCE` is unset, propose the default source `sample` and do not call Jira; does not cover health bands, page rendering, or the goal-status file
