@@ -29,6 +29,13 @@
   + `blockers` lists keys from inward links whose inward description is `is blocked by`. An outward `blocks` link does not add a key. A blocker outside the sprint is still listed and is not added as its own issue.
   + `dueDate` is the calendar date. Drop the time of day.
   + The same input must produce the same object. Do not invent keys, points, assignees, or dates.
+  + Present the issues list as one markdown table. Do not use a prose paragraph or a nested bullet for each issue.
+  + Columns, in order: `key`, `summary`, `type`, `statusName`, `statusCategory`, `storyPoints`, `assignee`, `dueDate`, `flagged`, `blockers`.
+  + One row per issue. Put `name`, `goal`, `startDate`, and `endDate` in labeled lines above the table, not as extra columns.
+  + The `assignee` cell is `displayName`, or `null` when the assignee is null. Do not put `accountId` in the table.
+  + The `blockers` cell is comma-separated keys, or empty when there are none.
+  + Write a missing points value or due date as `null`. Write `flagged` as `true` or `false`.
+  + A filtered selection, such as the most urgent, the biggest, or a requested count, uses the same columns and only the selected rows.
 
 - **Constraints.**
   + Jira Cloud only. Jira Server and Jira Data Center are out of scope.

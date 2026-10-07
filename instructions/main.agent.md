@@ -14,7 +14,7 @@ Each entry below is an instruction file with a one-line description. Optional su
   + Keywords: status report, weekly report, accomplishments, blockers, next week
   + Target: `reports/**/*.md`, `work/*-report.md`
   + Exceptions: does not apply when filling the Sprint Health Dashboard report described in `reports/instructions.md`
-- [`./instructions/fetch-jira-issues.agent.md`](./fetch-jira-issues.agent.md) — Fetch and format one board's active sprint issues from the Jira Cloud API.
-  + Keywords: Jira, Jira API, fetch issues, format issue data, live mode, active sprint
+- [`./instructions/fetch-jira-issues.agent.md`](./fetch-jira-issues.agent.md) — Fetch and format one board's active sprint issues from the Jira Cloud API as a structured table.
+  + Keywords: Jira, Jira API, fetch issues, format issue data, live mode, active sprint, structured table, issues table
   + Target: `**/*jira*`, `app.py`
   + Exceptions: does not apply in sample mode; when `DATA_SOURCE` is unset, propose the default source `sample` and do not call Jira; does not cover health bands, page rendering, or the goal-status file

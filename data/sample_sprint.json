@@ -1,0 +1,302 @@
+{
+  "name": "Sample Sprint 20",
+  "goal": "A manager can judge sprint health from sample data, with a path to one live Jira board.",
+  "startDate": "2026-09-28",
+  "endDate": "2026-10-09",
+  "issues": [
+    {
+      "key": "SAMP-1",
+      "summary": "Define the shared sprint model",
+      "type": "Task",
+      "statusName": "Done",
+      "statusCategory": "Done",
+      "storyPoints": 3,
+      "assignee": {
+        "accountId": "acct-ava",
+        "displayName": "Ava Chen"
+      },
+      "dueDate": "2026-09-30",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-2",
+      "summary": "Add sample JSON that the page can load offline",
+      "type": "Task",
+      "statusName": "Done",
+      "statusCategory": "Done",
+      "storyPoints": 2,
+      "assignee": {
+        "accountId": "acct-ava",
+        "displayName": "Ava Chen"
+      },
+      "dueDate": "2026-10-01",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-3",
+      "summary": "Compute completed percent from done story points",
+      "type": "Task",
+      "statusName": "Done",
+      "statusCategory": "Done",
+      "storyPoints": 5,
+      "assignee": {
+        "accountId": "acct-noah",
+        "displayName": "Noah Patel"
+      },
+      "dueDate": "2026-10-02",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-4",
+      "summary": "Compute elapsed percent from sprint calendar dates",
+      "type": "Task",
+      "statusName": "Done",
+      "statusCategory": "Done",
+      "storyPoints": 3,
+      "assignee": {
+        "accountId": "acct-noah",
+        "displayName": "Noah Patel"
+      },
+      "dueDate": "2026-10-02",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-5",
+      "summary": "Label the points-versus-time band",
+      "type": "Task",
+      "statusName": "In Progress",
+      "statusCategory": "In Progress",
+      "storyPoints": 2,
+      "assignee": {
+        "accountId": "acct-noah",
+        "displayName": "Noah Patel"
+      },
+      "dueDate": "2026-10-08",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-6",
+      "summary": "Render the sprint name, dates, and today's date",
+      "type": "Task",
+      "statusName": "In Progress",
+      "statusCategory": "In Progress",
+      "storyPoints": 1,
+      "assignee": {
+        "accountId": "acct-mia",
+        "displayName": "Mia Alvarez"
+      },
+      "dueDate": "2026-10-08",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-7",
+      "summary": "Show the sprint goal and the goal-status control",
+      "type": "Task",
+      "statusName": "In Progress",
+      "statusCategory": "In Progress",
+      "storyPoints": 3,
+      "assignee": {
+        "accountId": "acct-mia",
+        "displayName": "Mia Alvarez"
+      },
+      "dueDate": "2026-10-09",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-8",
+      "summary": "Build the Blocked list from flag, status, and links",
+      "type": "Task",
+      "statusName": "Blocked",
+      "statusCategory": "In Progress",
+      "storyPoints": 5,
+      "assignee": {
+        "accountId": "acct-liam",
+        "displayName": "Liam Okonkwo"
+      },
+      "dueDate": "2026-10-06",
+      "flagged": true,
+      "blockers": ["EXT-12"]
+    },
+    {
+      "key": "SAMP-9",
+      "summary": "Build the Overdue list from due dates before today",
+      "type": "Task",
+      "statusName": "To Do",
+      "statusCategory": "To Do",
+      "storyPoints": 3,
+      "assignee": {
+        "accountId": "acct-liam",
+        "displayName": "Liam Okonkwo"
+      },
+      "dueDate": "2026-10-03",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-10",
+      "summary": "Build the Unassigned list for open work with no owner",
+      "type": "Task",
+      "statusName": "To Do",
+      "statusCategory": "To Do",
+      "storyPoints": 2,
+      "assignee": null,
+      "dueDate": "2026-10-10",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-11",
+      "summary": "Build the Overloaded list from open points versus the median",
+      "type": "Task",
+      "statusName": "In Progress",
+      "statusCategory": "In Progress",
+      "storyPoints": 8,
+      "assignee": {
+        "accountId": "acct-liam",
+        "displayName": "Liam Okonkwo"
+      },
+      "dueDate": "2026-10-09",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-12",
+      "summary": "Keep empty attention lists visible with a zero count",
+      "type": "Task",
+      "statusName": "To Do",
+      "statusCategory": "To Do",
+      "storyPoints": 1,
+      "assignee": {
+        "accountId": "acct-mia",
+        "displayName": "Mia Alvarez"
+      },
+      "dueDate": null,
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-13",
+      "summary": "Escape summaries so sample text cannot inject markup",
+      "type": "Task",
+      "statusName": "To Do",
+      "statusCategory": "To Do",
+      "storyPoints": 1,
+      "assignee": {
+        "accountId": "acct-ava",
+        "displayName": "Ava Chen"
+      },
+      "dueDate": "2026-10-09",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-14",
+      "summary": "Save goal status to a local JSON file",
+      "type": "Task",
+      "statusName": "In Progress",
+      "statusCategory": "In Progress",
+      "storyPoints": 3,
+      "assignee": {
+        "accountId": "acct-noah",
+        "displayName": "Noah Patel"
+      },
+      "dueDate": "2026-10-08",
+      "flagged": false,
+      "blockers": ["SAMP-7"]
+    },
+    {
+      "key": "SAMP-15",
+      "summary": "Reject a goal status that is not one of the three values",
+      "type": "Task",
+      "statusName": "To Do",
+      "statusCategory": "To Do",
+      "storyPoints": 2,
+      "assignee": {
+        "accountId": "acct-noah",
+        "displayName": "Noah Patel"
+      },
+      "dueDate": "2026-10-10",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-16",
+      "summary": "Read live sprint issues only when the data source is live",
+      "type": "Task",
+      "statusName": "To Do",
+      "statusCategory": "To Do",
+      "storyPoints": null,
+      "assignee": {
+        "accountId": "acct-unassigned-name",
+        "displayName": "Unassigned"
+      },
+      "dueDate": "2026-10-09",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-17",
+      "summary": "Name a missing Jira variable without printing its value",
+      "type": "Task",
+      "statusName": "To Do",
+      "statusCategory": "To Do",
+      "storyPoints": 2,
+      "assignee": {
+        "accountId": "acct-ava",
+        "displayName": "Ava Chen"
+      },
+      "dueDate": "2026-10-05",
+      "flagged": true,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-18",
+      "summary": "Show a clear message when the board has no active sprint",
+      "type": "Task",
+      "statusName": "To Do",
+      "statusCategory": "To Do",
+      "storyPoints": 0.5,
+      "assignee": {
+        "accountId": "acct-mia",
+        "displayName": "Mia Alvarez"
+      },
+      "dueDate": "2026-10-10",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-19",
+      "summary": "Stop when the board reports more than one active sprint",
+      "type": "Task",
+      "statusName": "Done",
+      "statusCategory": "Done",
+      "storyPoints": 1,
+      "assignee": null,
+      "dueDate": "2026-10-01",
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAMP-20",
+      "summary": "Style the summary so it stays readable before the lists",
+      "type": "Task",
+      "statusName": "To Do",
+      "statusCategory": "To Do",
+      "storyPoints": 0,
+      "assignee": {
+        "accountId": "acct-liam",
+        "displayName": "Liam Okonkwo"
+      },
+      "dueDate": "2026-10-09",
+      "flagged": false,
+      "blockers": []
+    }
+  ]
+}
