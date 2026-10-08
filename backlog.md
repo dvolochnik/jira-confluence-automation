@@ -6,6 +6,15 @@ Build Core Features in this order: sprint model and health rules, then the page,
 
 The contract is `project_spec.md`. Where a task and that file disagree, the spec wins until the spec is edited.
 
+## How repeating work should run
+
+These marks cover work the dashboard repeats on every refresh. Setup, layout, fixtures, tests, and the README stay unmarked because each is done once.
+
+- **Dedicated tool** — code in this repo with fixed inputs and outputs, the same result on every run, and a pytest lock.
+- **Rovo MCP** — a person asking Jira questions in chat through `https://mcp.atlassian.com/v2/mcp`.
+
+Every repeating step below is a dedicated tool. Rovo MCP is the better place for a follow-up question about one listed issue, such as why it is blocked or who last changed it. That question stays outside this app: the spec keeps a single ruleset and allows no writes to Jira.
+
 ## Setup
 
 - [ ] Confirm Python 3.11 or newer, create a virtualenv, and install the pinned packages in `requirements.txt` (Flask, Jinja2, requests, python-dotenv, pytest).
@@ -23,19 +32,32 @@ The contract is `project_spec.md`. Where a task and that file disagree, the spec
 - [ ] Define one sprint model used by both modes: sprint name, goal text, start date, end date, and issues. Each issue has key, summary, type, status name, status category, story points or null, assignee or null, due date or null, a flagged bit, and blocker links.
 - [ ] Map sample JSON into that model before any status or list runs. Templates and list rules must not read raw sample JSON. Use ISO dates and null for a missing assignee, points, or due date.
 - [ ] Drop issues before point sums and list rules. Count only type names Story, Bug, and Task, case-insensitive. Exclude Sub-task, Subtask, any other type (including Epic and a type named User Story), and any issue that has a parent and is not Story, Bug, or Task. Do not walk children to discover extra points.
+  - **Dedicated tool.** The type allow-list is exact, including the rejection of Epic and “User Story”, and the same issue set must feed every later total.
 - [ ] Treat an issue as done only when status category is Done. Trust the category, not the status name and not the resolution field.
+  - **Dedicated tool.** Done is one field comparison. A Jira search in chat can treat a status name as done and move the band.
 - [ ] Normalize story points: null, missing, non-numeric, and negative values count as zero; a stored zero stays zero; fractional points such as 0.5 sum as numbers and are not rounded before the total.
+  - **Dedicated tool.** Use `tools/normalize_story_points.py`. Null, negative, and fractional points have fixed results that a chat answer will not repeat.
 - [ ] Compute committed points as the sum of normalized points on counted issues, and done points as that sum on issues whose category is Done. When committed points are zero, completed percent is 100.
+  - **Dedicated tool.** Use `tools/compute_committed_done_points_completed percent.py`. The zero-commitment case is defined as 100 percent and has to match the tests on every refresh.
 - [ ] Compute elapsed percent from calendar dates on the server’s local “today”: day count is end minus start; portion passed is today minus start, divided by that day count, times 100. Elapsed is 0 before the start date and 100 on or after the end date. If start and end are the same day, elapsed is 100 on or after that day and 0 before it.
+  - **Dedicated tool.** Use `tools/elapsed_percent_and_health gap.py`. Elapsed percent is calendar arithmetic on the server’s today, which Rovo MCP does not calculate.
 - [ ] If sprint start or end is missing, skip both percents and record that dates are unavailable. Do not treat missing dates as zero elapsed.
+  - **Dedicated tool.** Same elapsed tool. A missing date must suppress both percents; a chat lookup has no such rule.
 - [ ] Set `gap = elapsed percent − completed percent` and apply the band to the unrounded gap: On track when gap is 0 or negative, At risk when gap is greater than 0 and at most 15, Off track when gap is greater than 15.
+  - **Dedicated tool.** Same elapsed tool. The band uses the unrounded gap, so a displayed 15.0 stays At risk. That comparison belongs in code.
 - [ ] Build the Blocked list from counted, not-done issues that match any of: flagged impediment, status name Blocked (case-insensitive), or an inward “is blocked by” link. An outward “blocks” link alone does not qualify. One issue, one row. Name every matching signal in the order flag, status, then link (`Flagged`, `Status: Blocked`, `Blocked by` plus linked keys when present). A missing flag or missing links makes only that signal false. A blocker outside the sprint still counts and is not imported as its own row.
+  - **Dedicated tool.** Membership depends on flag, status name, and inward link direction, then prints those signals in a fixed order. A Jira query can find blocked work, and it will not reproduce this row contract.
 - [ ] Build the Overdue list from counted, not-done issues whose due date is before today. A due date of today is not overdue. Missing, empty, and unparseable due dates stay off the list. Do not copy the sprint end date or a subtask due date onto a parent. Compare calendar dates and ignore time of day. Show the due date as `YYYY-MM-DD`.
+  - **Dedicated tool.** Overdue is a calendar comparison with explicit exclusions. The page needs the same rows after every refresh.
 - [ ] Build the Unassigned list from counted, not-done issues with no assignee. No assignee means null, missing, or no account id and no display name. A real account whose display name is “Unassigned” stays assigned. A deactivated account stays assigned.
+  - **Dedicated tool.** “Unassigned” as a display name stays assigned. That exception is too specific for a Jira search phrased in chat.
 - [ ] Build the Overloaded list of people, not issues. Open points are normalized points on counted, not-done issues. Assignees with open points greater than zero form the median set (middle value, or the average of the two middle values). A person is listed only when open points are strictly greater than 1.5 times that median and at least 5. One person with all the open work yields an empty list. Unassigned open issues do not create a person. Omit anyone who fails either threshold.
+  - **Dedicated tool.** The median, the 1.5 times threshold, and the minimum of 5 are local arithmetic. Jira has no tool that returns this people list.
 - [ ] Sort Blocked, Overdue, and Unassigned by issue key ascending. Sort Overloaded by open points descending, then by display name. The same input must yield the same order.
+  - **Dedicated tool.** Sort order is part of the contract and is asserted in tests.
 - [ ] Add committed sample JSON that is safe to commit and covers: equal completed and elapsed (On track), 15 points behind (At risk), more than 15 behind (Off track), flag-only, status-only, link-only, and flag-plus-link blocked issues, one overdue issue, one not-done unassigned story and one done unassigned story, one open issue with null points, one issue with no due date, one subtask under a counted story, one overloaded person, one even-load case where Overloaded is empty, one issue on two lists, a non-empty sprint goal, and a second fixture whose goal text is null or whitespace.
 - [ ] Load that sample file when `DATA_SOURCE` is `sample`. Do not call the network and do not read Jira variables on that path, even if they are set.
+  - **Dedicated tool.** Sample mode reads a local file on every refresh. A Rovo MCP call would open the network on the path that must stay offline.
 
 ### Page
 
@@ -47,15 +69,18 @@ The contract is `project_spec.md`. Where a task and that file disagree, the spec
 - [ ] In sample mode, issue keys and the sprint name are plain text, not links.
 - [ ] Escape issue summaries and any other text taken from the data source.
 - [ ] Recompute lists from the current source on every refresh. Do not keep a stale in-memory sprint.
+  - **Dedicated tool.** Each refresh runs the same local pipeline: map, filter, points, band, then the four lists. Rovo MCP is a remote chat session and would make the page depend on tool choice and latency.
 - [ ] Style the page with plain CSS so the summary is readable before the lists on a 1280-pixel-wide window, and so a narrow window still shows health first in document order. Status words appear as text in the HTML, not only as CSS class names.
 - [ ] Add no filter, search, issue-detail page, or other control. The goal-status form is the only form, and it must save without JavaScript.
 
 ### Goal-status save
 
 - [ ] Store one local file, `data/goal_status.json`, with a single field `status` whose value is `on_track`, `at_risk`, or `off_track`. Sample mode and live mode share this file. Do not key it by sprint id.
+  - **Dedicated tool.** The manager’s judgment is a local file shared by both modes. Rovo MCP would write that judgment into Jira, which this version does not do.
 - [ ] On load, if the file is missing, empty, unreadable, or holds any other value, show On track and do not overwrite the bad file until the manager submits a valid status.
 - [ ] Render the control as a fieldset of three always-visible choices labeled On track, At risk, and Off track. Exactly one is selected. Reject any other posted value: leave the file unchanged and show an error.
 - [ ] On a valid post, create the parent `data/` directory if needed, write the JSON to a temporary file, flush it, and replace `data/goal_status.json`. Then render the page with that status selected. Saving the same value again rewrites the file and is not an error.
+  - **Dedicated tool.** The save repeats on every choice and must replace the file atomically. That is local file I/O, with no Jira call.
 - [ ] If the write fails, show the previous status and a save error. Do not claim the new choice was stored.
 - [ ] Changing `DATA_SOURCE` does not clear the file. A Jira failure must not change the saved status either.
 
@@ -64,8 +89,11 @@ The contract is `project_spec.md`. Where a task and that file disagree, the spec
 Live mode only. The health rules, page, and goal-status file already exist and must not grow a second set of rules for Jira.
 
 - [ ] When `DATA_SOURCE=live`, require `JIRA_SITE_URL`, `JIRA_BOARD_ID`, `JIRA_EMAIL`, and `JIRA_API_TOKEN` before any HTTP call. If one is missing, name the variable on the page and do not include its value. Expect an HTTPS site URL with no trailing path beyond the host. Do not disable certificate checks.
+  - **Dedicated tool.** Live mode repeats this check on every process start. The page must name a missing variable and keep the token and email off the page. Rovo MCP authenticates with its own OAuth flow, so it cannot satisfy this env-var contract.
 - [ ] Call Jira Cloud with basic auth (`JIRA_EMAIL` and `JIRA_API_TOKEN`) using GET only. Use the Agile API to read the board’s active sprint, then the issue search API for that sprint’s issues. Request summary, issue type, status, assignee, due date, story points, flag, and issue links. Do not request comments or attachments. Page the search internally until the sprint’s issues are loaded, then discard anything that is not in that sprint.
+  - **Dedicated tool.** This is the repeating Jira read, and it still belongs in a small GET client: one board, the active sprint, a closed field list, full paging, then the local health rules. Rovo MCP is the better fit when someone asks an open question about that same board in chat. A single-product Jira lookup there is free; cross-product search spends Rovo credits, and the returned tools are not this sprint model. Tests for this task use a fake HTTP layer and must keep working with no MCP session.
 - [ ] Map the live payload into the same sprint model the sample path uses, then run the existing health rules. If the site uses a differently named story-point field, do not add a mapping in this version.
+  - **Dedicated tool.** Live and sample issues pass through one mapper before any rule runs. A second interpretation inside Rovo MCP would create the second ruleset this section forbids.
 - [ ] If the board has no active sprint, show a clear message and no issue lists. Do not fall back to sample data or to the last closed sprint.
 - [ ] If the board reports more than one active sprint, show an error and do not pick one.
 - [ ] If Jira returns an HTTP error or a JSON shape the mapper cannot read, show the error in the summary region (variable names and status codes only, never the token or email) and render no fabricated issue rows. Leave the saved goal status unchanged. Keep the goal-status control on the page.
