@@ -17,13 +17,13 @@ Every repeating step below is a dedicated tool. Rovo MCP is the better place for
 
 ## Setup
 
-- [ ] Confirm Python 3.11 or newer, create a virtualenv, and install the pinned packages in `requirements.txt` (Flask, Jinja2, requests, python-dotenv, pytest).
-- [ ] Replace the calculator app: add `app.py` as the only start command (`python app.py` from the repo root) and remove `calculator.py` and `main.py` from the project.
-- [ ] Lay out the dashboard package: `app.py`, Jinja templates, one plain CSS file, `data/` for sample JSON, and a `tests/` package. No frontend framework and no client-side router.
-- [ ] Load config with `python-dotenv` when a local `.env` exists. Variables already set on the machine win. Default `DATA_SOURCE` to `sample` when it is unset. Exit on startup with a clear error if `DATA_SOURCE` is anything other than `sample` or `live`.
-- [ ] Bind the process to localhost only. Print the local URL on start. Do not enable a debug console that prints request headers, and do not turn on directory listing.
-- [ ] Fail startup with a clear file error if the template or the default sample JSON is missing. Do not serve a blank 200.
-- [ ] Confirm `.gitignore` keeps `.env`, `.env.*`, `data/goal_status.json`, and virtualenv directories out of git. Do not commit tokens, emails, or internal URLs.
+- [ ] Confirm Python 3.11 or newer, create a virtualenv, and install the pinned packages in `requirements.txt` (Flask, Jinja2, requests, python-dotenv, pytest). (#1)
+- [ ] Replace the calculator app: add `app.py` as the only start command (`python app.py` from the repo root) and remove `calculator.py` and `main.py` from the project. (#2)
+- [ ] Lay out the dashboard package: `app.py`, Jinja templates, one plain CSS file, `data/` for sample JSON, and a `tests/` package. No frontend framework and no client-side router. (#3)
+- [ ] Load config with `python-dotenv` when a local `.env` exists. Variables already set on the machine win. Default `DATA_SOURCE` to `sample` when it is unset. Exit on startup with a clear error if `DATA_SOURCE` is anything other than `sample` or `live`. (#4)
+- [ ] Bind the process to localhost only. Print the local URL on start. Do not enable a debug console that prints request headers, and do not turn on directory listing. (#5)
+- [ ] Fail startup with a clear file error if the template or the default sample JSON is missing. Do not serve a blank 200. (#6)
+- [ ] Confirm `.gitignore` keeps `.env`, `.env.*`, `data/goal_status.json`, and virtualenv directories out of git. Do not commit tokens, emails, or internal URLs. (#7)
 
 ## Core Features
 
