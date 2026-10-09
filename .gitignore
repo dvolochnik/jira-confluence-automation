@@ -5,6 +5,10 @@
 # Local runtime data (sprint-goal status written by the app)
 data/goal_status.json
 
+# App dependencies
+frontend/node_modules/
+backend/node_modules/
+
 # Byte-compiled / cache
 __pycache__/
 *.py[cod]
