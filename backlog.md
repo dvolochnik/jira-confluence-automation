@@ -73,6 +73,7 @@ Every repeating step below is a dedicated tool. Rovo MCP is the better place for
 - [ ] Build the Overloaded list of people, not issues. Open points are normalized points on counted, not-done issues. Assignees with open points greater than zero form the median set (middle value, or the average of the two middle values). A person is listed only when open points are strictly greater than 1.5 times that median and at least 5. One person with all the open work yields an empty list. Unassigned open issues do not create a person. Omit anyone who fails either threshold.
   - **Dedicated tool.** The median, the 1.5 times threshold, and the minimum of 5 are local arithmetic. Jira has no tool that returns this people list.
   - **Coding agent.**
+  - **Approach 3 (Script).**
 - [ ] Sort Blocked, Overdue, and Unassigned by issue key ascending. Sort Overloaded by open points descending, then by display name. The same input must yield the same order.
   - **Dedicated tool.** Sort order is part of the contract and is asserted in tests.
   - **Coding agent.**
@@ -136,6 +137,7 @@ Live mode only. The health rules, page, and goal-status file already exist and m
 - [ ] Map the live payload into the same sprint model the sample path uses, then run the existing health rules. If the site uses a differently named story-point field, do not add a mapping in this version.
   - **Dedicated tool.** Live and sample issues pass through one mapper before any rule runs. A second interpretation inside Rovo MCP would create the second ruleset this section forbids.
   - **Coding agent.**
+  - **Approach 3 (Script).**
 - [ ] If the board has no active sprint, show a clear message and no issue lists. Do not fall back to sample data or to the last closed sprint.
   - **Coding agent.**
 - [ ] If the board reports more than one active sprint, show an error and do not pick one.
