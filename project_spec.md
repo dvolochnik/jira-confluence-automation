@@ -26,7 +26,7 @@ Lists stay short. Headings remain when the count is zero so a manager can see th
 
 Dates are calendar dates. Percents shown on the page use one decimal place. The band uses the exact gap.
 
-The app is local. It binds to localhost and does not ship as a hosted service in this version.
+The app is local. It is a React frontend and a Node.js backend, started together with Docker so the same compose file is portable across machines. It binds to localhost and does not ship as a hosted service in this version.
 
 Tests lock the rules with sample fixtures. A reviewer should not need a Jira site to confirm the bands and the lists.
 
@@ -45,7 +45,7 @@ Needs attention is four lists under that summary: blocked, overdue, unassigned, 
 
 The page is a snapshot, not a second backlog. It does not ask the manager to scan every sprint issue. Done work stays in the point totals and stays off the attention lists. Subtasks stay out of both, so parent points are not counted twice.
 
-The manager uses the page to decide what to unblock, reassign, or rebalance before the sprint ends. The page does not make those changes in Jira. The only value it stores is the manager’s goal-status judgment, in a file next to the app.
+The manager uses the page to decide what to unblock, reassign, or rebalance before the sprint ends. The page does not make those changes in Jira. The only value it stores is the manager’s goal-status judgment, in a host file mounted into the backend.
 
 A manager who already sees a healthy sprint can stop after the summary. A manager who sees risk can move straight to the list that explains it. Either reading should be possible without opening Jira first. Sample mode exists so that reading works with no credentials.
 
@@ -76,31 +76,34 @@ A manager who already sees a healthy sprint can stop after the summary. A manage
 
 ## Tech Stack
 
-- **Language.** Python 3.11 or newer. The app is a single local process started from this repo.
-- **Server.** Flask serves one HTML page and one form post that saves the sprint-goal status.
-- **Page.** Jinja2 templates render HTML. Layout and status colors are plain CSS. No frontend framework and no client-side router.
-- **HTTP client.** `requests` calls the Jira Cloud REST API in live mode only. Sample mode does not import a network call into the request path.
-- **Config.** `python-dotenv` loads a local `.env` when that file exists. Environment variables already set on the machine win.
+- **Language.** JavaScript. The backend is Node.js. The page is a React frontend.
+- **Layout.** `frontend/` holds the React app. `backend/` holds the Node.js app. `docker-compose.yml` at the repo root starts both.
+- **Container.** The app must run in Docker so it is portable. `docker-compose.yml` starts the React frontend and the Node.js backend. The page is published on localhost. The same compose file runs on any machine with Docker. This version is not a shared host, a container cluster, or a public URL.
+- **Backend.** Node.js serves the sprint snapshot as JSON and accepts the goal-status save. Health rules run on the backend before the page shows them.
+- **Frontend.** React renders the one page. Layout and status colors are CSS. The frontend calls the backend. It does not compute the health bands itself.
+- **HTTP client.** The Node.js backend calls the Jira Cloud REST API in live mode only. In sample mode the React page calls only the local backend. That path does not call Jira.
+- **Config.** The backend loads a local `.env` when that file exists. Environment variables already set on the machine win.
 - **Sample data.** A JSON file in the repo with the same shape as a Jira sprint: sprint name, goal, start, end, and issues.
-- **Goal status.** A JSON file next to the app, for example `data/goal_status.json`. Git ignores that file and `.env`.
-- **Tests.** `pytest` covers the status math, the four list rules, and the goal-status file round trip. Tests use sample data, not a live Jira site.
+- **Goal status.** `data/goal_status.json` on the host, mounted into the backend container. Git ignores that file and `.env`.
+- **Tests.** The Node.js test runner covers the status math, the four list rules, and the goal-status file round trip. Tests use sample data, not a live Jira site. Rule tests open no socket to Jira.
 - `DATA_SOURCE` — `sample` (default) or `live`. Any other value is an error on startup.
 - `JIRA_SITE_URL` — site base URL, with no trailing path beyond the host, such as `https://example.atlassian.net`.
 - `JIRA_BOARD_ID` — one numeric board id.
 - `JIRA_EMAIL` — Atlassian account email. Jira Cloud basic auth sends this with the token.
 - `JIRA_API_TOKEN` — API token. It is read from the environment and never written into source, logs, sample JSON, or HTML.
 - Live mode uses the Agile API to find the board’s active sprint, then the issue search API for that sprint’s issues, including story points, assignee, status category, due date, flag, and issue links.
-- Start command is `python app.py` from the repo root, then open the printed local URL in a browser. Dependencies are pinned in `requirements.txt`.
-- The process binds to localhost only. This version is not packaged for a shared host, a container cluster, or a public URL.
+- Start command is `docker compose up` from the repo root. Backend dependencies are pinned in `backend/package.json`. Frontend dependencies are pinned in `frontend/package.json`. Both services bind to localhost. The README states the localhost URL the manager opens. `docker compose up` does not have to print that URL.
+- Shutting down the app is stopping those compose services. One service is the React frontend. One service is the Node.js backend. No third service remains.
+- Portability is the compose file, not a second host or a public address.
 
 ## Success Criteria
 
 A build meets this version when all of the following are true.
 
-1. With no Jira credentials, starting the app and opening it in a browser shows the sample sprint: points-versus-time status, sprint goal text, goal status, and the four attention lists.
+1. With no Jira credentials, `docker compose up` serves the sample sprint on the localhost URL stated in the README. The React page shows that sprint from the Node.js backend: points-versus-time status, sprint goal text, goal status, and the four attention lists. The same compose file is the portable run of this version. The default page shows one sprint and one band.
 2. Points-versus-time status uses `gap = elapsed percent − completed percent`. On track when `gap` is 0 or negative. At risk when `gap` is greater than 0 and at most 15. Off track when `gap` is greater than 15.
-3. The sample sprint includes a fixture where completed percent equals elapsed percent, and that case is labeled On track.
-4. The sample sprint includes a fixture 15 percentage points behind, labeled At risk, and a fixture more than 15 behind, labeled Off track.
+3. A fixture where completed percent equals elapsed percent is labeled On track.
+4. A separate fixture 15 percentage points behind is labeled At risk, and a separate fixture more than 15 behind is labeled Off track. Those fixtures are for tests. They are not extra bands on the default page.
 5. Blocked, overdue, unassigned, and overloaded lists match the rules in Detailed Requirements on the sample sprint.
 6. An issue with no due date is absent from Overdue. The sprint end date alone does not put an issue on Overdue.
 7. A subtask is absent from every list and from point totals. Its parent’s points are counted once.
@@ -108,11 +111,11 @@ A build meets this version when all of the following are true.
 9. Overloaded is empty when no person meets both thresholds. A person with 5 or more open points is still omitted when those points are not above 1.5 times the median.
 10. An issue with no story points adds zero to the commitment and to open points, and it still appears on a list when it matches that list’s rule.
 11. When the sprint goal text is missing, the page says the goal is not set, and the status control still saves a value.
-12. After the manager sets the sprint-goal status, a browser refresh and a process restart both show that same status. A missing or unreadable status file starts the control at on track.
+12. After the manager sets the sprint-goal status, a browser refresh and a backend restart both show that same status. The file is on the host and mounted into the backend. A missing or unreadable status file starts the control at on track.
 13. With `DATA_SOURCE=live` and the Jira variables set, the same page shows the active sprint of that one board. Labels and lists follow the same rules. Only the source of the numbers changes.
 14. Live mode with no active sprint shows a clear message and does not fall back to sample data. A Jira error leaves the saved goal status unchanged.
 15. The API token is not visible in the page, the repo, application logs, or the goal-status file.
-16. Automated tests for the status bands, the four list rules, subtask exclusion, and the goal-status round trip pass without network access.
+16. Automated tests for the status bands, the four list rules, subtask exclusion, and the goal-status round trip pass without network access. They open no socket to Jira.
 
 ## Detailed Requirements
 
@@ -131,7 +134,7 @@ Empty lists still render their headings and an empty state sentence. A missing s
 The rest of this section states the rules those checks implement. Where a rule and an example disagree, the rule wins.
 
 - Functional requirements cover the two signals, the four lists, which issues count, done and estimates, data sources, and delivery.
-- Non-functional requirements cover offline sample mode, read-only Jira access, secret handling, and the local process.
+- Non-functional requirements cover sample mode, read-only Jira access, secret handling, and the local frontend and backend.
 - A rule that names “the page” applies in both data modes unless it says sample or live.
 - Counts in headings include only rows that the list actually renders.
 - Sorting is part of the requirement. Same input must yield the same row order.
@@ -151,13 +154,13 @@ Issue lists show key, summary, assignee or “Unassigned”, and story points. P
 
 Done issues remain in the commitment totals. They are excluded from Blocked, Overdue, and Unassigned, and their points are not open. Subtasks are excluded before those rules run.
 
-The only successful write is the goal status. After a successful post, the browser shows the page again with that status selected. After a failed post, the page shows the previous status and an error.
+The only successful write is the goal status. The backend writes the host file and returns the saved status. React shows that status. After a failed save, the page shows the previous status and an error.
 
 Sample mode and live mode use this same interaction. Live mode adds an error region when Jira cannot be read. That error does not remove the goal-status control.
 
 No other control edits sprint data. There is no filter bar, no search box, and no issue detail page in this version.
 
-- Refreshing the browser recomputes lists from the current source. It does not keep a stale in-memory sprint.
+- Refreshing the browser asks the backend again. The backend recomputes lists from the current source and does not keep a stale in-memory sprint.
 - The goal-status post is the only form. It sends one of the three allowed values.
 - Unknown form values are rejected. The file is left unchanged and the page shows an error.
 - The sprint name is plain text from the source. It is not a link to the board in sample mode.
@@ -176,7 +179,7 @@ Each signal has a short label and the three-way status. The points signal also s
 
 The signals do not hide each other. An Off track points label stays on screen when the goal status is On track, and the reverse is also shown as-is.
 
-“Today” for both signals is the server’s current date in the server’s local calendar. The page prints that date next to the sprint dates so the elapsed percent can be checked by hand.
+“Today” for both signals is the Node backend’s current date in that container’s local calendar. The page prints that date next to the sprint dates so the elapsed percent can be checked by hand.
 
 If the sprint dates are missing, the points signal says the dates are unavailable and does not invent a percent. The goal signal still renders.
 
@@ -223,7 +226,7 @@ The second signal is the sprint goal. It shows the goal text and a status the ma
 - That status is a judgment. Jira does not supply it. It does not change the points-versus-time status, and the points-versus-time status does not change it.
 - The page loads the saved status from the local JSON file. The file stores one field, `status`, whose value is `on_track`, `at_risk`, or `off_track`.
 - If no status has been saved, or the file is missing, empty, or contains another value, the control starts at on track. The page does not overwrite a bad file until the manager chooses a status.
-- Choosing a status saves it immediately. The handler writes the file, then renders the page. A refresh and a restart both show the saved value.
+- Choosing a status saves it immediately. The backend writes the host file and returns the saved status. React shows that status. A refresh and a backend restart both show the saved value.
 - If the write fails, the page keeps the previous status and shows a save error. It does not pretend the new choice was stored.
 - Sample mode and live mode share this one saved status. This version has a single active sprint on the page, so the file does not key the status by sprint id.
 - Changing data source does not clear the file. The manager can set the status again when the underlying sprint changes.
@@ -262,11 +265,11 @@ A person with open work who is not over the threshold is omitted from Overloaded
 
 An issue is blocked when any of these is true, and the issue is not done:
 
-- It is flagged in Jira (Flagged = Impediment).
-- Its status name is Blocked. The match is case-insensitive. Other status names are not treated as blocked.
-- It has an “is blocked by” link to another issue. The link type’s inward description is “is blocked by”. A “blocks” outward link, by itself, does not put this issue on the list.
+- It is flagged in Jira (Flagged = Impediment). The row text is “Flagged”.
+- Its status name is Blocked. The match is case-insensitive. Other status names are not treated as blocked. The row text is “Status: Blocked”.
+- It has an “is blocked by” link to another issue. The link type’s inward description is “is blocked by”. A “blocks” outward link, by itself, does not put this issue on the list. The row text is “Blocked by” plus the linked issue keys when those keys are present. Linked keys that are missing from the payload still count. The row then says “Blocked by” without a key.
 
-One issue appears once. The row shows which signal matched. When more than one signal matches, the row lists each of them, in the order flag, status, then link.
+One issue appears once. When more than one signal matches, the row lists each of them, in the order flag, status, then link.
 
 A done issue is omitted even if the flag or the link is still present. A subtask is omitted even if it is flagged. The parent is judged on its own fields.
 
@@ -274,53 +277,35 @@ The link signal does not require the blocking issue to be inside this sprint. A 
 
 If the flagged field is missing from the payload, the flag signal is false. If links are missing, the link signal is false. The status signal still applies.
 
-Sample data sets these three signals explicitly so each one can be true alone and so one issue can carry two of them.
+Priority, labels, components, high priority, in progress, and waiting on a code review do not add a signal. Those states need one of the three signals.
 
-The blocked list does not include issues that are merely high priority, in progress, or waiting on a code review. Those states need one of the three signals.
-
-- Flag text on the row is “Flagged”. Status text is “Status: Blocked”. Link text is “Blocked by” plus the linked issue keys when those keys are present.
-- Linked keys that are missing from the payload still count as the link signal. The row then says “Blocked by” without a key.
-- Priority, labels, and components do not add a fourth signal.
-- An issue blocked only by an outward “blocks” link is not listed.
-- Sample fixtures cover flag-only, status-only, link-only, and flag-plus-link. The last of those is one row with both signals.
+Sample fixtures cover flag-only, status-only, link-only, and flag-plus-link. The last of those is one row with both signals.
 
 ##### Overdue
 
 An issue is overdue when its due date is before today and it is not done. An issue with no due date is not overdue. The sprint end date feeds the on-track signal and does not, by itself, mark issues overdue.
 
-- Compare dates, not timestamps. A due date of today is not overdue. A due date of yesterday is overdue.
-- “Today” is the server’s current calendar date, the same date used for elapsed time.
+- Compare dates, not timestamps. A due date of today is not overdue, even if the sprint ends today. A due date of yesterday is overdue. Time-of-day on a Jira date-time is ignored. The calendar date is the whole comparison.
+- “Today” is the Node backend’s current calendar date, the same date used for elapsed time.
 - A done issue with a past due date is omitted. Done means status category Done, not a particular status name.
-- A missing due date, an empty string, and an unparseable due date are all “no due date”. They stay off this list. The row is not shown as an error in this list.
-- The sprint end date is not copied onto issues that lack a due date.
+- A missing due date, an empty string, and an unparseable due date are all “no due date”. They stay off this list. The sprint end date is not copied onto them. The row is not shown as an error in this list.
 - An issue that is also blocked or unassigned still appears here when the due date rule matches. The other lists keep their own rows.
-- The row shows the due date so the manager can see how late it is. It does not show a day count that treats the sprint end as the deadline.
-- Subtasks with due dates are ignored. If the parent has its own past due date and is not done, the parent is listed once.
+- The row shows the due date as `YYYY-MM-DD`. It does not show a day count that treats the sprint end as the deadline.
+- Subtasks with due dates are ignored. If the parent has its own past due date and is not done, the parent is listed once. A parent with no due date stays off the list even when a subtask is overdue. The subtask is not counted, and its date is not copied up.
 - Future due dates are not listed, including due dates after the sprint end. Being unfinished near the sprint end is the points-versus-time signal, not this list.
-- The due date is shown as `YYYY-MM-DD`.
-- Time-of-day on a Jira date-time is ignored. The calendar date is the whole comparison.
-- Issues due today stay off the list even if the sprint ends today.
-- A parent with no due date stays off the list even when a subtask is overdue. The subtask is not counted, and its date is not copied up.
 - The overdue list does not sort by how late the issue is. It sorts by issue key, like the other issue lists.
 
 ##### Unassigned
 
 An issue is unassigned when it has no assignee and it is not done.
 
-- No assignee means the assignee field is null, missing, or has no account id and no display name.
-- A display name of “Unassigned” supplied as a real account is still an assignee. Only the absence of an account counts.
-- Done issues with no assignee are omitted. Their points remain in the commitment if they are stories, bugs, or tasks.
+- No assignee means the assignee field is null, missing, or has no account id and no display name. A display name of “Unassigned” on a real account is still an assignee. A deactivated account is still assigned. Only the absence of an account counts.
+- Done issues with no assignee are omitted, including issues that were unassigned when the work finished. Their points remain in the commitment if they are stories, bugs, or tasks.
 - Subtasks with no assignee are omitted. They do not create a row and they do not add points.
-- The row shows “Unassigned” in the assignee column and still shows the key, summary, and story points.
-- An unassigned issue with no story points still appears. Points display as an em dash and count as zero.
-- An unassigned issue can also be blocked or overdue. It is then on each matching list, once per list.
-- Assignee is read from the issue, not inferred from a commit, a comment, or a sprint role.
+- The column header is Assignee. The row shows “Unassigned” and still shows the key, summary, and story points. An unassigned issue with no story points still appears. Points display as an em dash and count as zero.
+- An unassigned issue can also be blocked or overdue. It is then on each matching list, once per list. A future due date appears here and not on Overdue.
+- Assignee is read from the issue, not inferred from a commit, a comment, or a sprint role. This list does not propose an assignee.
 - Sample data includes one not-done story with a null assignee and one done story with a null assignee. Only the first appears here.
-- The column header is Assignee. The empty value is the word Unassigned.
-- An issue assigned to a deactivated account is still assigned. It is not moved here.
-- Unassigned issues with a future due date appear here and not on Overdue.
-- Unassigned done issues never appear here, even when they were unassigned at the end of the work.
-- This list does not propose an assignee. It only shows that nobody is set.
 
 ##### Overloaded
 
@@ -333,23 +318,18 @@ Open points are story points on issues that are not done. Unestimated open issue
 
 The median uses those open-point totals, one number per person. With an odd count, the median is the middle value after sorting. With an even count, the median is the average of the two middle values. When only one person has open work, the median is that person’s total, so the 1.5 times test fails and the list is empty.
 
-When the team’s load is even, this list is empty. Even means no person is strictly above 1.5 times the median. The list is people, not issues. Each row names the person, their open points, the median, and the threshold.
+When the team’s load is even, this list is empty. Even means no person is strictly above 1.5 times the median. The list is people, not issues. Each row names the person, their open points, the median, and the threshold. The median and the threshold are shown to one decimal place. The comparison uses the exact values.
 
-- The comparison is strict. Open points equal to 1.5 times the median are not enough. Open points of 4.9 are not enough, even if they exceed the median test, because of the 5 point floor.
+- The comparison is strict. Open points equal to 1.5 times the median are not enough. Open points of 4.9 are not enough, even when they beat the median test, because of the 5 point floor. A person who misses either threshold is omitted. The row must not appear “almost overloaded.”
 - Unassigned open issues do not create an “Unassigned” person on this list. They belong to Unassigned.
 - A person whose issues are all done has zero open points and is not part of the median.
-- Two assignees are two people even when their open points match. Ties stay as separate rows.
-- Names sort only as a tie-break. The primary sort is open points descending.
-- Sample data includes one overloaded person and one even-load fixture where this list is empty. Tests cover both.
+- Two assignees are two people even when their open points match. Ties stay as separate rows. Sort is open points descending, then display name.
 - The threshold is computed from the current sprint load on each page load. It is not a stored team setting.
-- Show the median and the threshold rounded to one decimal place. Apply the comparison to the exact values.
-- A person who meets the median test and misses the 5 point floor is omitted. The row must not appear “almost overloaded.”
+- The default page shows one sprint. Sample fixtures include one overloaded person and one even-load case where this list is empty. Tests cover both. The even-load case is not a second band on the default page.
 
 #### Which issues count
 
-Stories, bugs, and tasks count toward story points and toward every attention list. Subtasks are excluded, so a parent’s points are not added again through its children.
-
-- Issue type is matched on the type name, case-insensitive: Story, Bug, and Task.
+- Stories, bugs, and tasks count toward story points and toward every attention list. Issue type is matched on the type name, case-insensitive: Story, Bug, and Task. A type named “User Story” is not a Story match. The sample uses the three exact names.
 - A subtask is any issue whose type is Sub-task or Subtask, or whose parent field is set and whose type is not Story, Bug, or Task. Excluded either way.
 - Epics, spikes saved as a custom type, and other types are excluded from points and from all four lists. They do not appear as their own rows.
 - Done stories, bugs, and tasks stay in the point totals. They do not appear on Blocked, Overdue, or Unassigned. Their points are not open, so they do not feed Overloaded.
@@ -357,7 +337,6 @@ Stories, bugs, and tasks count toward story points and toward every attention li
 - If a parent and a subtask both carry points, only the parent’s points are added. The subtask’s points are dropped, not subtracted.
 - Issue type comes from the sample file or from Jira’s issue type field. The app does not reclassify work by summary text.
 - The sample sprint contains one subtask under a counted story. Tests assert the subtask key is absent and the parent points appear once.
-- Counted types are only Story, Bug, and Task. A type named “User Story” is not a Story match. The sample uses the three exact names.
 - Exclusion happens before list rules and before point sums. Later rules must not see dropped issues.
 - A bug counts the same as a story for points and for every list. There is no separate bug section.
 - Tasks count the same way. A task with no points can still be blocked, overdue, or unassigned.
@@ -366,18 +345,14 @@ Stories, bugs, and tasks count toward story points and toward every attention li
 
 #### Done and estimates
 
-- An issue is done when its Jira status category is Done. The status name can be Done, Closed, Resolved, or a team-specific name. The category is what matters.
-- Status category To Do or In Progress is not done, including a status named “Done” if the category were ever not Done. Trust the category field only.
+- An issue is done only when its status category is Done. Category names are Done, In Progress, and To Do. The status name can be Done, Closed, Resolved, or a team-specific name. A status named Done whose category is not Done is not done. Trust the category field only.
 - In sample data the category is stored on the issue. In live data it is the status category returned with the issue.
 - An issue with no story points counts as zero toward the commitment and the overload rule. It still appears on an attention list when it matches that list’s rule.
 - No story points means null, missing, or a non-numeric value. Zero is a real estimate and stays zero. Negative values are treated as missing and count as zero.
 - Story points are not rounded before they are summed. Display of a row may show the original number. Totals use the sum of those numbers.
-- The field is Jira story points. Time estimates and remaining time are not a substitute when points are missing.
 - A done issue with no points adds zero to done points and zero to committed points beyond that zero. It cannot by itself create a commitment.
-- Status category names are Done, In Progress, and To Do. Only Done means done.
 - An issue with category Done is done even when the resolution field is empty. Resolution is not read.
-- Remaining estimate is not displayed and not summed.
-- Original estimate is not a fallback for story points.
+- The field is Jira story points. Time estimates are not a substitute when points are missing. Remaining estimate is not displayed and not summed. Original estimate is not a fallback for story points.
 - The zero-point rule applies in sample mode and live mode with the same code path.
 - Tests include one open issue with null points on the unassigned list and in a commitment total of the other issues only.
 - Fractional story points such as 0.5 are allowed. They are summed as numbers, not rounded to a whole point first.
@@ -387,54 +362,48 @@ Stories, bugs, and tasks count toward story points and toward every attention li
 - **Default.** Built-in sample data with the same shape as a Jira sprint: issues, points, assignees, blockers, due dates, sprint dates, and a sprint goal. The page works with no credentials.
 - **Live.** `DATA_SOURCE=live` switches the same page to the active sprint of one Jira board. The site URL, board, account email, and API token come from the environment.
 - The page shows the same health snapshot in both modes. Only the source of the numbers changes. Mapping into the sprint model happens before the rules run.
-- Sample data includes at least one case for each status band and each attention list, plus one even-load case so Overloaded can be empty, and one issue that sits on two lists.
-- Sample data also includes a subtask, a done issue, an issue with no points, an issue with no due date, and a sprint goal string that can be cleared in a second fixture for the empty-goal test.
-- The sample file lives in the repo and is safe to commit. It contains no tokens, emails, or internal URLs.
+- The default page loads one sample sprint and therefore one band. Separate fixtures cover the other bands, an even-load case where Overloaded is empty, one issue that sits on two lists, a subtask, a done issue, an issue with no points, an issue with no due date, and a sprint goal that is null or whitespace.
+- The sample files live in the repo and are safe to commit. They contain no tokens, emails, or internal URLs.
 - Live mode sends basic auth with `JIRA_EMAIL` and `JIRA_API_TOKEN`. It requests the active sprint for `JIRA_BOARD_ID` and then the issues in that sprint.
 - Live mode requests the fields the rules need: summary, issuetype, status, assignee, duedate, story points, flag, and issue links. It does not request comments or attachments.
 - If a required live variable is missing, the page shows which variable name is missing and does not call Jira. The token value is never included in that message.
 - A live HTTP error or a JSON shape the mapper cannot read shows an error in the summary region and no fabricated issue rows.
-- The mapper’s output is the only input to the health rules. Templates do not read raw Jira JSON.
+- The mapper’s output is the only input to the health rules. The React page does not read raw Jira JSON. It renders the snapshot from the Node.js backend.
 - Sample JSON uses ISO dates and null for missing assignee, points, and due date.
-- A second sample fixture may override the goal text with null for the empty-goal test. The default fixture has a non-empty goal.
+- The default fixture has a non-empty goal. The empty-goal case is a separate fixture.
 - Board id, email, and token are unused in sample mode even if they are present in the environment.
-- Switching `DATA_SOURCE` requires a new process start or a reload that re-reads the environment. The page has no toggle button.
+- Switching `DATA_SOURCE` requires a new backend start or a reload that re-reads the environment. The page has no toggle button.
 
 #### Delivery
 
-- A local web page, started from this project and opened in the browser. The start command prints a localhost URL.
-- The sprint-goal status is saved in a file next to the app and kept across refresh and restart.
-- The repo contains the app, templates, sample JSON, requirements file, and tests. A new clone runs sample mode after installing those requirements.
+Run and shutdown steps are in Tech Stack.
+
+- The repo contains `frontend/`, `backend/`, `docker-compose.yml`, sample JSON, and tests. A new clone runs sample mode by the Tech Stack start command.
 - No database install, no Jira app install, and no browser extension are required.
-- The goal-status file is created on the first successful save. It is not committed. The README states the path and the three allowed values.
-- Sample mode is the default when `DATA_SOURCE` is unset. A reviewer can follow the success criteria without a Jira site.
-- Live mode is optional and documented as environment variables. The README lists the variable names and the read-only token permission.
+- The goal-status file is the host file from Tech Stack. It is created on the first successful save, is not committed, and is mounted into the backend. The parent `data/` directory is created if it is missing at save time. The README states the path and the three allowed values `on_track`, `at_risk`, and `off_track`.
+- Sample mode is the default when `DATA_SOURCE` is unset. The default run needs no `.env` file. Adding `.env` is how a developer turns on live mode. A reviewer can follow the success criteria without a Jira site.
+- The README states the localhost URL, lists the live-mode variable names, and states the read-only token permission. It points at this spec for the rules and does not restate a second ruleset.
 - The page is usable at a normal laptop width. The summary appears before the lists in document order so a narrow window still shows health first.
-- Install steps are short: create a virtualenv, install `requirements.txt`, run `python app.py`, open the URL.
-- The default run needs no `.env` file. Adding `.env` is how a developer turns on live mode.
-- The goal-status path is created if the parent data directory is missing at save time.
-- Tests run with `pytest` and do not start a browser.
+- Tests run with the Node.js test runner and do not start a browser. Rule tests open no socket to Jira.
 - A browser check is still part of delivery: load sample mode and confirm the summary and four headings render.
-- The README points at this spec for the rules and does not restate a second, conflicting ruleset.
-- Shutting down the process is stopping that Python process. No separate service remains.
 
 ### Non-functional
 
-- Sample mode makes no network call and starts with no credentials. Tests that cover sample mode fail if a socket is opened.
+- Sample mode starts with no credentials. The React page calls only the local Node backend. That path does not call Jira. Rule tests open no socket to Jira.
 - Live mode is read-only. The only HTTP methods used against Jira are GET. A failed Jira call shows an error on the page and leaves the last saved goal status untouched.
 - The API token and email are read from the environment. They are not rendered, logged, or committed. Error text may include the variable name and the HTTP status code, not the header value.
-- Saving the goal status writes the file and flushes it before the page reloads, so a refresh shows the new value. A crash during write must not leave a partial JSON file that the next load treats as a valid status. Write to a temporary file and replace the target.
+- Saving the goal status writes the host file and flushes it before the backend returns, so a refresh shows the new value. A crash during write must not leave a partial JSON file that the next load treats as a valid status. Write to a temporary file and replace the target. The backend returns the saved status, and React shows it.
 - The summary is above the four lists. A manager can read on-track status without scrolling through the lists on a 1280 pixel wide window.
-- One local process. No database and no account system. The Flask process is the whole app.
+- The React frontend and the Node.js backend run under Docker Compose. No database and no account system. The backend holds the sprint and writes the goal-status file. The frontend displays that snapshot. Compose is how the pair stays portable.
 - The page responds for the sample sprint without a spinner requirement. Live mode may wait on Jira, and the browser shows the result or the error, not a blank document.
 - Status colors are not the only signal. Each status is also a text label, so the bands remain clear without color.
-- The goal-status form works with HTML controls. It does not depend on JavaScript to save.
-- `.env`, the goal-status file, and virtualenv directories stay out of git, matching the existing ignore rules.
-- The app listens on localhost. It does not enable directory listing or a debug console that prints request headers in this version’s default start.
+- The goal-status control lives in the React page. Saving sends the choice to the Node.js backend, which writes the mounted host file and returns the saved status.
+- `.env`, `data/goal_status.json`, `frontend/node_modules`, and `backend/node_modules` stay out of git.
+- Both services bind to localhost. The manager opens the frontend URL. The default start does not enable directory listing or a debug console that prints request headers.
 - Repeated loads of unchanged sample data produce the same labels, the same list membership, and the same row order.
 - The sample page’s HTML includes the status words as text, not only as CSS class names.
 - Logs for a normal sample request do not include issue descriptions beyond the key, and never include env values.
-- A missing template or sample file fails at startup with a clear file error rather than a blank 200 page.
+- A missing frontend entry or sample file fails at startup with a clear file error rather than a blank page.
 
 ## Constraints
 
@@ -444,7 +413,7 @@ Nothing in this version may require a paid hosting account, a shared database, o
 
 The success criteria are the acceptance test for these limits. A feature that breaks sample mode, writes to Jira, or needs a second board is outside the constraint even if it would be useful.
 
-Calendar dates, one file for goal status, and one process are deliberate. They are not placeholders for a later scheduler or a multi-user store in this same version.
+Calendar dates, one host file for goal status, and one Node backend plus one React frontend are deliberate. They are not placeholders for a later scheduler or a multi-user store in this same version.
 
 - Technical constraints cover Jira Cloud, localhost, JSON files, and read-only access.
 - Time constraints cover this version’s boundary: the success criteria, not a calendar deadline and not later-version work.
@@ -452,7 +421,7 @@ Calendar dates, one file for goal status, and one process are deliberate. They a
 - A constraint overrides a nice-to-have in the same document. The non-goals list the same boundary in plainer language.
 - The app may page Jira’s search API internally. That is an implementation detail, not a second product feature.
 - No constraint requires a particular IDE, operating system, or browser extension.
-- Windows, macOS, and Linux are all acceptable as the one developer machine, as long as Python 3.11 runs.
+- Windows, macOS, and Linux are all acceptable as the one developer machine, as long as Docker runs the compose file. Node.js is the runtime inside the backend image. The frontend image runs the React app.
 - The local file and the sample file are UTF-8 JSON.
 - Secrets are a constraint, not only a wish. Committing a token fails the version.
 - The single-sprint rule is a constraint. Code that accepts a sprint id parameter is extra and not required.
@@ -461,16 +430,17 @@ Calendar dates, one file for goal status, and one process are deliberate. They a
 ### Technical
 
 - One board and its active sprint. The app does not write to Jira. It does not transition issues, edit fields, or add comments.
+- The runnable app is the React frontend and the Node.js backend started from `docker-compose.yml`. Portability means those services run on another machine with Docker and still serve the page on localhost. A container cluster and a public URL stay out of this version.
 - Jira Cloud basic auth needs a site URL, account email, board id, and API token with permission to read that board and its issues. Jira Server and Jira Data Center are not targets of this version.
 - No database. Sample data and the goal-status file are local JSON. SQLite and hosted stores are out of this version.
 - The goal-status file is single-user. Concurrent editors are not supported. The last successful write wins if two browsers on the same machine post together. That race is accepted.
-- Elapsed time uses the server’s calendar date and the sprint start and end dates from the data source. The app does not apply a team timezone setting or a working-day calendar.
+- Elapsed time uses the Node backend’s calendar date and the sprint start and end dates from the data source. The app does not apply a team timezone setting or a working-day calendar.
 - Live mode depends on Jira being reachable from the machine running the app. There is no offline cache of live issues and no retry queue.
 - Story points must be the Jira story point field. If the site uses a differently named numeric field, this version does not map it. Sample mode is unaffected.
 - The blocked flag is the Jira impediment flag. Custom “blocked” checkboxes are ignored unless they surface as that flag, the status name Blocked, or an “is blocked by” link.
-- The process is stateful only through the goal-status file. Restarting the process does not keep memory. It rereads sample data or Jira and rereads the file.
-- HTML is rendered by the server. The goal text is escaped. Issue summaries from Jira are escaped. The page does not inject unsanitized API text into the document.
-- Dependencies stay in `requirements.txt`. The app does not shell out to the Jira CLI or a browser automation tool.
+- The backend is stateful only through the mounted goal-status file. Restarting the backend does not keep memory. It rereads sample data or Jira and rereads the host file.
+- The React page shows text from the Node.js backend. The goal text is escaped. Issue summaries from Jira are escaped. The page does not inject unsanitized API text into the document.
+- Dependencies stay in `frontend/package.json` and `backend/package.json`. The app does not shell out to the Jira CLI or a browser automation tool.
 - Locale is the machine default for “today”. Display dates use ISO dates (`YYYY-MM-DD`) so the sample and the page can be compared without a locale puzzle.
 - The board id is a number taken from the environment. The page does not call the board list API to offer choices.
 - HTTPS is the expected scheme for `JIRA_SITE_URL`. The app does not disable certificate checks.
@@ -486,7 +456,7 @@ Calendar dates, one file for goal status, and one process are deliberate. They a
 - Review time is a local read of the page plus the automated tests. There is no staging environment to promote.
 - The elapsed-time rule uses the wall calendar only. Building a business-day calendar is not part of the schedule for this version.
 - Empty states, the three status bands, and the four lists ship together. A partial page that shows only the summary does not meet the version.
-- Documentation time is the README start steps and the variable names. A separate user manual is not required.
+- Documentation time is the README localhost URL and the variable names. A separate user manual is not required. Run steps stay in Tech Stack.
 - Bug fixes for the rules in this spec are in version scope. New list types are not, even if they would be quick.
 - The version does not wait on a Jira admin to install an app. A personal API token is enough for the optional live path.
 - Sample data is maintained by hand for the fixtures the tests need. There is no import project to plan.
@@ -496,21 +466,21 @@ Calendar dates, one file for goal status, and one process are deliberate. They a
 
 ### Resource
 
-- The app runs on the developer’s machine and is opened in a local browser. One CPU process is enough.
-- Sample mode needs no Jira account and no network. Disk need is the repo plus one small JSON status file.
+- How the app starts is in Tech Stack. The two Docker services run on the developer’s machine and are opened in a local browser.
+- Sample mode needs no Jira account. Disk need is the repo plus one small JSON status file on the host. Its only network use is the local frontend-to-backend call.
 - Live mode needs network access to the Jira site and one API token. It does not need a service account shared by the team.
-- Memory is whatever Flask needs to hold one sprint’s issues. This version does not stream or paginate in the UI. The implementation may page the Jira search internally until the sprint’s issues are loaded.
+- Memory is whatever the Node.js backend needs to hold one sprint’s issues. This version does not stream or paginate in the UI. The implementation may page the Jira search internally until the sprint’s issues are loaded.
 - No GPU, queue, or cache server is required. No background worker is required.
 - The token’s owner must be allowed to browse the board. The project does not provision that permission.
 - Log output stays on the local console. There is no log shipping and no metrics account.
 - The goal-status file is the only growing local state, and it stays a single JSON object. It does not become a history log.
-- Developers need Python 3.11 or newer and the packages in `requirements.txt`. They do not need a Jira SDK license.
+- Developers do not need a Jira SDK license. Node.js, React, Docker, and the two package files are specified in Tech Stack.
 - Browser support is a current Chrome, Edge, or Firefox. The page uses a form and CSS, not a specific device.
 - Secrets stay in the environment of that one machine. Sharing them in chat or committing them is outside how this app is meant to be run.
 - The sample sprint is small on purpose, enough to hit each rule. Loading a multi-year issue archive is not a resource this version plans for.
 - One developer can run and test the app. No shared lab environment is required.
-- Disk for dependencies is a normal virtualenv. The repo does not vendor wheels.
-- Network use is zero in sample mode and one site in live mode. No other host is required.
+- Disk for the runnable app is the Docker images for the frontend and the backend. The repo does not vendor dependency trees.
+- Live mode adds one Jira site. No other host is required.
 
 ## Non-Goals
 
@@ -522,7 +492,7 @@ Explicitly out of scope for this version:
 - Counting subtasks toward points or attention lists. Parents already carry the points.
 - Treating a missing due date, or a sprint that is about to end, as overdue. Only a due date before today, on a not-done counted issue, is overdue.
 - Creating or updating Jira issues, assignees, comments, or the sprint goal text. The manager sets only the local goal status.
-- A login screen, user accounts, or a hosted multi-user deployment. The process is local and has no password form.
+- A login screen, user accounts, or a hosted multi-user deployment. The app is local and has no password form.
 - Email, Slack, or scheduled digests. Nothing sends itself on a timer.
 - Editing story points, due dates, or assignees on the dashboard. Those fields are displayed from the data source.
 - A combined health score that collapses the points signal and the goal judgment into one number.
