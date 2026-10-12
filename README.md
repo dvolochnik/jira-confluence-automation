@@ -1,29 +1,19 @@
-# Python Calculator
+# Sprint Health Dashboard
 
-A simple calculator project that provides basic arithmetic operations.
+The API is served at http://127.0.0.1:3000.
 
-## Features
+## Local setup
 
-- `add(a, b)` — returns the sum of two numbers
-- `subtract(a, b)` — returns the difference of two numbers
-- `multiply(a, b)` — returns the product of two numbers
+- Set `TZ` to the host IANA time zone before starting the backend.
+- Configure the live Jira values in your environment or a local `.env` file:
+  - `JIRA_SITE_URL`
+  - `JIRA_BOARD_ID`
+  - `JIRA_EMAIL`
+  - `JIRA_API_TOKEN`
+- The Jira API token is read-only.
+- The sprint-goal status is stored in `data/goal_status.json`.
+- Valid goal status values are `on_track`, `at_risk`, and `off_track`.
 
-## Usage
+## Product rules
 
-```bash
-python main.py
-```
-
-`main.py` demos all operations, including multiplication:
-
-```python
-from calculator import multiply
-
-print(multiply(10, 4))  # 40
-```
-
-## Project Structure
-
-- `calculator.py` — calculator functions
-- `main.py` — demo entry point that uses the calculator
-- `README.md` — this file
+See `project_spec.md` for the product rules and the sprint health dashboard specification.
