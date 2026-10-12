@@ -12,24 +12,24 @@ Rules, copy, ports, and the sample sprint are the behavior contract in `spec/pla
 
 | Task | Title | Milestone |
 | --- | --- | --- |
-| T1.1 | Pin the backend | M1 |
-| T1.2 | Run PostgreSQL and the backend in Compose | M1 |
-| T1.3 | Create `job_runs` and migrate on boot | M1 |
-| T1.4 | Load configuration once | M1 |
-| T1.5 | Stub the two API routes | M1 |
-| T1.6 | Replace the README and ignore local files | M1 |
-| T2.1 | Pin the frontend | M2 |
-| T2.2 | Serve the frontend and proxy `/api` | M2 |
-| T2.3 | Render the seven-region skeleton | M2 |
-| T2.4 | Call the stub API | M2 |
-| T3.1.1 | Add decimal arithmetic | M3.1 |
-| T3.1.2 | Decide which issues count | M3.1 |
-| T3.1.3 | Compute points versus time | M3.1 |
-| T3.1.4 | Add the default sample sprint | M3.1 |
-| T3.1.5 | Return the sample snapshot | M3.1 |
-| T3.1.6 | Store each snapshot load | M3.1 |
-| T3.1.7 | Fail startup on a bad sample setup | M3.1 |
-| T3.1.8 | Show sprint identity and the points signal | M3.1 |
+| [x] T1.1 | Pin the backend | M1 |
+| [x] T1.2 | Run PostgreSQL and the backend in Compose | M1 |
+| [x] T1.3 | Create `job_runs` and migrate on boot | M1 |
+| [x] T1.4 | Load configuration once | M1 |
+| [x] T1.5 | Stub the two API routes | M1 |
+| [x] T1.6 | Replace the README and ignore local files | M1 |
+| [x] T2.1 | Pin the frontend | M2 |
+| [x] T2.2 | Serve the frontend and proxy `/api` | M2 |
+| [x] T2.3 | Render the seven-region skeleton | M2 |
+| [x] T2.4 | Call the stub API | M2 |
+| [x] T3.1.1 | Add decimal arithmetic | M3.1 |
+| [x] T3.1.2 | Decide which issues count | M3.1 |
+| [x] T3.1.3 | Compute points versus time | M3.1 |
+| [x] T3.1.4 | Add the default sample sprint | M3.1 |
+| [x] T3.1.5 | Return the sample snapshot | M3.1 |
+| [x] T3.1.6 | Store each snapshot load | M3.1 |
+| [x] T3.1.7 | Fail startup on a bad sample setup | M3.1 |
+| [x] T3.1.8 | Show sprint identity and the points signal | M3.1 |
 | T3.2.1 | Build the Blocked list | M3.2 |
 | T3.2.2 | Build the Overdue list | M3.2 |
 | T3.2.3 | Build the Unassigned list | M3.2 |

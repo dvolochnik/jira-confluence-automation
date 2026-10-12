@@ -1,0 +1,61 @@
+{
+  "name": "Sample Sprint",
+  "goal": "Ship the health page.",
+  "startDate": "2026-10-01",
+  "endDate": "2026-10-15",
+  "issues": [
+    {
+      "key": "SAM-1",
+      "type": "Story",
+      "statusName": "In Progress",
+      "statusCategory": "In Progress",
+      "points": 5,
+      "assignee": {
+        "accountId": "ada",
+        "displayName": "Ada"
+      },
+      "dueDate": "2026-09-30",
+      "flagged": true,
+      "blockers": []
+    },
+    {
+      "key": "SAM-2",
+      "type": "Bug",
+      "statusName": "To Do",
+      "statusCategory": "To Do",
+      "points": 3,
+      "assignee": null,
+      "dueDate": null,
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAM-3",
+      "type": "Task",
+      "statusName": "Done",
+      "statusCategory": "Done",
+      "points": 2,
+      "assignee": {
+        "accountId": "bo",
+        "displayName": "Bo"
+      },
+      "dueDate": null,
+      "flagged": false,
+      "blockers": []
+    },
+    {
+      "key": "SAM-4",
+      "type": "Story",
+      "statusName": "In Progress",
+      "statusCategory": "In Progress",
+      "points": 8,
+      "assignee": {
+        "accountId": "ada",
+        "displayName": "Ada"
+      },
+      "dueDate": null,
+      "flagged": false,
+      "blockers": []
+    }
+  ]
+}

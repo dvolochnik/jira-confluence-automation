@@ -33,5 +33,16 @@ services:
     command: ["npm", "run", "start"]
     working_dir: /app
 
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:5173:5173"
+    environment:
+      TZ: ${TZ:-UTC}
+    working_dir: /app
+
 volumes:
   postgres_data:

@@ -1,0 +1,102 @@
+:root {
+  color-scheme: light;
+  font-family: Arial, sans-serif;
+  line-height: 1.5;
+  color: #1f2937;
+  background: #f8fafc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f8fafc;
+}
+
+button,
+input,
+legend {
+  font: inherit;
+}
+
+.sprint-health-page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.page-title {
+  margin: 0 0 1.5rem;
+  font-size: 2rem;
+}
+
+.region {
+  background: #ffffff;
+  border: 1px solid #dfe7f1;
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 1rem 1.25rem;
+}
+
+.region-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+}
+
+.placeholder {
+  margin: 0;
+  color: #6b7280;
+}
+
+.error-message {
+  margin: 0 0 1rem;
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.goal-status-fieldset {
+  border: 1px solid #dfe7f1;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.goal-status-fieldset legend {
+  padding: 0 0.35rem;
+  font-weight: 700;
+}
+
+.goal-status-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+  color: #374151;
+}
+
+.goal-status-option input {
+  margin: 0;
+}
+
+.attention-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.attention-list-item {
+  border-top: 1px solid #edf2f7;
+  padding-top: 0.5rem;
+  color: #4b5563;
+}
+
+.attention-list-item:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.attention-list-placeholder {
+  color: #6b7280;
+}
