@@ -1,0 +1,6 @@
+{
+  "name": "Done Issue Fixture",
+  "issues": [
+    { "key": "DONE-1", "type": "Task", "statusName": "Done", "statusCategory": "Done", "points": 3, "flagged": true, "dueDate": "2026-09-30" }
+  ]
+}

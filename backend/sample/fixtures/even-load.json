@@ -1,0 +1,7 @@
+{
+  "name": "Even Load Fixture",
+  "issues": [
+    { "key": "EVEN-1", "type": "Story", "points": 2, "assignee": { "accountId": "a", "displayName": "Ada" } },
+    { "key": "EVEN-2", "type": "Bug", "points": 4, "assignee": { "accountId": "b", "displayName": "Bo" } }
+  ]
+}

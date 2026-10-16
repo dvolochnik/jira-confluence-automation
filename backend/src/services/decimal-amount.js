@@ -3,29 +3,47 @@ function normalizeDecimal(value) {
     return value.decimal;
   }
 
-  if (value === null || value === undefined || Number.isNaN(value)) {
+  if (
+    value === null
+    || value === undefined
+    || (typeof value === 'number' && !Number.isFinite(value))
+  ) {
     return null;
   }
 
-  let text = String(value).trim();
+  const text = String(value).trim();
 
-  if (text === '' || text.toLowerCase() === 'null' || text.toLowerCase() === 'nan') {
+  if (!text || text.toLowerCase() === 'null' || text.toLowerCase() === 'nan') {
     return null;
   }
 
-  const sign = text.startsWith('-') ? -1n : 1n;
-  text = text.replace(/^[+-]/, '');
+  const match = text.match(/^([+-]?)(\d*)(?:\.(\d*))?(?:[eE]([+-]?\d+))?$/);
 
-  if (text === '' || text === '.') {
+  if (!match || (!match[2] && !match[3])) {
     return null;
   }
 
-  const [wholePart, fractionPart = ''] = text.split('.');
-  const digits = `${wholePart.replace(/^0+/, '') || '0'}${fractionPart}`.replace(/\.?0+$/, '') || '0';
-  const scale = fractionPart.length;
+  const sign = match[1] === '-' ? -1n : 1n;
+  const exponent = Number(match[4] ?? 0);
+  if (!Number.isSafeInteger(exponent) || Math.abs(exponent) > 10000) {
+    return null;
+  }
+
+  let digits = `${match[2] || '0'}${match[3] ?? ''}`.replace(/^0+/, '') || '0';
+  let scale = (match[3] ?? '').length - exponent;
 
   if (digits === '0') {
     return { coefficient: 0n, scale: 0 };
+  }
+
+  if (scale < 0) {
+    digits += '0'.repeat(-scale);
+    scale = 0;
+  }
+
+  while (scale > 0 && digits.endsWith('0')) {
+    digits = digits.slice(0, -1);
+    scale -= 1;
   }
 
   return {

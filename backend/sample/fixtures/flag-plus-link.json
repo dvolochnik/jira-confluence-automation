@@ -1,0 +1,6 @@
+{
+  "name": "Flag and Link Fixture",
+  "issues": [
+    { "key": "BOTH-1", "type": "Story", "statusName": "In Progress", "statusCategory": "In Progress", "points": 1, "flagged": true, "blockedByKeys": ["BOTH-2"] }
+  ]
+}

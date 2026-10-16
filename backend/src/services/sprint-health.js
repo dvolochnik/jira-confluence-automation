@@ -2,6 +2,13 @@ const fs = require('fs');
 const path = require('path');
 
 const { computeCommittedAndDonePoints, computePointsVersusTime, parseDate } = require('./points-versus-time');
+const {
+  buildBlockedList,
+  buildOverdueList,
+  buildUnassignedList,
+  buildOverloadedList,
+} = require('./attention-lists');
+const { getGoalStatus } = require('./goal-status');
 
 const SAMPLE_SPRINT_PATH = path.resolve(__dirname, '..', '..', 'sample', 'sprint.json');
 
@@ -13,12 +20,7 @@ function getSprintHealthStub() {
       status: 'on_track',
       label: 'On track',
     },
-    attention: [
-      { name: 'blocked', count: 0, rows: [] },
-      { name: 'overdue', count: 0, rows: [] },
-      { name: 'unassigned', count: 0, rows: [] },
-      { name: 'overloaded', count: 0, rows: [] },
-    ],
+    attention: getEmptyAttention(),
   };
 }
 
@@ -43,12 +45,12 @@ function formatAsOfDate(date, timeZone = process.env.TZ || 'UTC') {
 }
 
 function getEmptyAttention() {
-  return [
-    { name: 'blocked', count: 0, rows: [] },
-    { name: 'overdue', count: 0, rows: [] },
-    { name: 'unassigned', count: 0, rows: [] },
-    { name: 'overloaded', count: 0, rows: [] },
-  ];
+  return {
+    blocked: { count: 0, rows: [] },
+    overdue: { count: 0, rows: [] },
+    unassigned: { count: 0, rows: [] },
+    overloaded: { count: 0, rows: [], median: null, threshold: null },
+  };
 }
 
 function loadSampleSprint(sprintPath = SAMPLE_SPRINT_PATH) {
@@ -60,6 +62,26 @@ function loadSampleSprint(sprintPath = SAMPLE_SPRINT_PATH) {
   }
 
   return sprint;
+}
+
+function listPayload(name, rows, extra = {}) {
+  return { name, count: rows.length, rows, ...extra };
+}
+
+function getSampleAttention(issues, today) {
+  const overloaded = buildOverloadedList(issues);
+
+  return {
+    blocked: listPayload('blocked', buildBlockedList(issues)),
+    overdue: listPayload('overdue', buildOverdueList(issues, today)),
+    unassigned: listPayload('unassigned', buildUnassignedList(issues)),
+    overloaded: listPayload('overloaded', overloaded.rows, {
+      median: overloaded.median,
+      medianDisplay: overloaded.medianDisplay,
+      threshold: overloaded.threshold,
+      thresholdDisplay: overloaded.thresholdDisplay,
+    }),
+  };
 }
 
 function getSprintHealthSample({ today, sprintPath = SAMPLE_SPRINT_PATH } = {}) {
@@ -103,18 +125,15 @@ function getSprintHealthSample({ today, sprintPath = SAMPLE_SPRINT_PATH } = {}) 
     },
     pointsVersusTime: {
       label: pointsSummary.label,
-      completedPercent: pointsSummary.completedPercent,
-      elapsedPercent: pointsSummary.elapsedPercent,
+      completedPercent: pointsSummary.completedDisplay,
+      elapsedPercent: pointsSummary.elapsedDisplay,
       gap: pointsSummary.gap,
       gapDisplay: pointsSummary.gapDisplay,
       committedPoints: pointsSummary.committedPoints,
       donePoints: pointsSummary.donePoints,
     },
-    goalStatus: {
-      status: 'on_track',
-      label: 'On track',
-    },
-    attention: getEmptyAttention(),
+    goalStatus: getGoalStatus(),
+    attention: getSampleAttention(issues, asOfDate),
   };
 }
 
@@ -124,4 +143,5 @@ module.exports = {
   getSprintHealthSample,
   formatAsOfDate,
   getEmptyAttention,
+  getSampleAttention,
 };

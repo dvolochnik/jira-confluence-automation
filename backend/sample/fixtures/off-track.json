@@ -1,0 +1,8 @@
+{
+  "name": "Off Track Fixture",
+  "startDate": "2026-10-01",
+  "endDate": "2026-10-11",
+  "issues": [
+    { "key": "OFF-1", "type": "Story", "statusName": "To Do", "statusCategory": "To Do", "points": 0 }
+  ]
+}

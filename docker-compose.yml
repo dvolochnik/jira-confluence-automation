@@ -24,8 +24,12 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://app:secret@postgres:5432/app
-      DATA_SOURCE: sample
+      DATA_SOURCE: ${DATA_SOURCE:-sample}
       TZ: ${TZ:-UTC}
+      JIRA_SITE_URL: ${JIRA_SITE_URL:-}
+      JIRA_BOARD_ID: ${JIRA_BOARD_ID:-}
+      JIRA_EMAIL: ${JIRA_EMAIL:-}
+      JIRA_API_TOKEN: ${JIRA_API_TOKEN:-}
     ports:
       - "127.0.0.1:3000:3000"
     volumes:

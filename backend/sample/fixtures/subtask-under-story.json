@@ -1,0 +1,7 @@
+{
+  "name": "Subtask Fixture",
+  "issues": [
+    { "key": "PARENT-1", "type": "Story", "statusName": "In Progress", "statusCategory": "In Progress", "points": 5 },
+    { "key": "PARENT-1-1", "type": "Sub-task", "parent": { "key": "PARENT-1" }, "statusName": "To Do", "statusCategory": "To Do", "points": 3, "dueDate": "2026-09-30" }
+  ]
+}

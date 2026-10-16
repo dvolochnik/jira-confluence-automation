@@ -1,0 +1,6 @@
+{
+  "name": "Status Only Fixture",
+  "issues": [
+    { "key": "STATUS-1", "type": "Task", "statusName": "Blocked", "statusCategory": "In Progress", "points": 1, "flagged": false }
+  ]
+}

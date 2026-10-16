@@ -1,0 +1,6 @@
+{
+  "name": "Null Points Fixture",
+  "issues": [
+    { "key": "NULL-1", "type": "Story", "statusName": "To Do", "statusCategory": "To Do", "points": null, "assignee": null }
+  ]
+}

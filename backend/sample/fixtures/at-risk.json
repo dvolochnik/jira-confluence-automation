@@ -1,0 +1,8 @@
+{
+  "name": "At Risk Fixture",
+  "startDate": "2026-10-01",
+  "endDate": "2026-10-11",
+  "issues": [
+    { "key": "RISK-1", "type": "Story", "statusName": "In Progress", "statusCategory": "In Progress", "points": 1 }
+  ]
+}

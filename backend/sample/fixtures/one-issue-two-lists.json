@@ -1,0 +1,6 @@
+{
+  "name": "One Issue Two Lists Fixture",
+  "issues": [
+    { "key": "DUAL-1", "type": "Story", "statusName": "In Progress", "statusCategory": "In Progress", "points": 2, "flagged": true, "dueDate": "2026-09-30" }
+  ]
+}

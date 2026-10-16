@@ -30,22 +30,22 @@ Rules, copy, ports, and the sample sprint are the behavior contract in `spec/pla
 | [x] T3.1.6 | Store each snapshot load | M3.1 |
 | [x] T3.1.7 | Fail startup on a bad sample setup | M3.1 |
 | [x] T3.1.8 | Show sprint identity and the points signal | M3.1 |
-| T3.2.1 | Build the Blocked list | M3.2 |
-| T3.2.2 | Build the Overdue list | M3.2 |
-| T3.2.3 | Build the Unassigned list | M3.2 |
-| T3.2.4 | Build the Overloaded list | M3.2 |
-| T3.2.5 | Serve the lists on the sample page | M3.2 |
-| T3.3.1 | Store the goal status in the host file | M3.3 |
-| T3.3.2 | Accept the goal-status POST | M3.3 |
-| T3.3.3 | Save from the goal fieldset | M3.3 |
-| T3.4.1 | Reject a bad live configuration before calling Jira | M3.4 |
-| T3.4.2 | Map one active sprint from Jira | M3.4 |
-| T3.4.3 | Return live errors without sample rows | M3.4 |
-| T3.4.4 | Link live keys and show the waiting sentence | M3.4 |
-| T4.1 | Run the full automated suite | M4 |
-| T4.2 | Boot the sample stack with no `.env` | M4 |
-| T4.3 | Check logs and secrets | M4 |
-| T4.4 | Walk the page in a browser | M4 |
+| [x] T3.2.1 | Build the Blocked list | M3.2 |
+| [x] T3.2.2 | Build the Overdue list | M3.2 |
+| [x] T3.2.3 | Build the Unassigned list | M3.2 |
+| [x] T3.2.4 | Build the Overloaded list | M3.2 |
+| [x] T3.2.5 | Serve the lists on the sample page | M3.2 |
+| [x] T3.3.1 | Store the goal status in the host file | M3.3 |
+| [x] T3.3.2 | Accept the goal-status POST | M3.3 |
+| [x] T3.3.3 | Save from the goal fieldset | M3.3 |
+| [x] T3.4.1 | Reject a bad live configuration before calling Jira | M3.4 |
+| [x] T3.4.2 | Map one active sprint from Jira | M3.4 |
+| [x] T3.4.3 | Return live errors without sample rows | M3.4 |
+| [x] T3.4.4 | Link live keys and show the waiting sentence | M3.4 |
+| [x] T4.1 | Run the full automated suite | M4 |
+| [x] T4.2 | Boot the sample stack with no `.env` | M4 |
+| [x] T4.3 | Check logs and secrets | M4 |
+| [x] T4.4 | Walk the page in a browser | M4 |
 
 ## Phase 1: Backend setup (database, API skeleton)
 
@@ -488,6 +488,8 @@ Do not add behavior in this phase. A failure is fixed in the task that owns it, 
 - Database tests use PostgreSQL 15.19 at `127.0.0.1:5432`.
 - The run opens no socket to Atlassian.
 - The suite covers every case listed in the automated-test table in `spec/plan.md`.
+
+**Execution note (2026-10-16):** The full suites pass: 46 backend tests and 2 frontend tests, with no failures or skips. Real PostgreSQL 15.19 at `127.0.0.1:5432` verified migration reruns, exactly one row per GET (including an ignored sprint query), safe rows for all four live error states, and HTTP 500 when PostgreSQL rejects an insert. The regression exposed incorrect non-null error-row snapshot fields; the route persistence mapping now follows the plan's null contract. The database test sets configuration before imports, creates and drops a unique schema without touching existing job history, and stubs Jira HTTP without opening an Atlassian socket. See the README for rerun commands.
 
 ### T4.2 Boot the sample stack with no `.env`
 

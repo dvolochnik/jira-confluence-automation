@@ -48,6 +48,7 @@ legend {
 .placeholder {
   margin: 0;
   color: #6b7280;
+  white-space: pre-wrap;
 }
 
 .error-message {
@@ -98,5 +99,20 @@ legend {
 }
 
 .attention-list-placeholder {
+  color: #6b7280;
+}
+
+.issue-row p {
+  margin: 0;
+}
+
+.issue-summary {
+  color: #1f2937;
+}
+
+.issue-details,
+.issue-signals,
+.issue-due-date {
+  margin-top: 0.25rem !important;
   color: #6b7280;
 }

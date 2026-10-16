@@ -1,0 +1,6 @@
+{
+  "name": "No Due Date Fixture",
+  "issues": [
+    { "key": "NODUE-1", "type": "Bug", "statusName": "In Progress", "statusCategory": "In Progress", "points": 1, "dueDate": null }
+  ]
+}

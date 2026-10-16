@@ -1,0 +1,6 @@
+{
+  "name": "Flag Only Fixture",
+  "issues": [
+    { "key": "FLAG-1", "type": "Story", "statusName": "In Progress", "statusCategory": "In Progress", "points": 1, "flagged": true }
+  ]
+}

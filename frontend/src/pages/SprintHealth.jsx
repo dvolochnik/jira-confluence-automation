@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import GoalStatusFieldset from '../components/GoalStatusFieldset';
 import AttentionList from '../components/AttentionList';
-import { getSprintHealth } from '../api/sprint-health-api';
+import { getSprintHealth, saveGoalStatus } from '../api/sprint-health-api';
 
 const attentionLabels = {
   blocked: 'Blocked',
@@ -13,6 +13,8 @@ const attentionLabels = {
 export function SprintHealth() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [savingStatus, setSavingStatus] = useState(false);
+  const [goalSaveError, setGoalSaveError] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -36,18 +38,32 @@ export function SprintHealth() {
     };
   }, []);
 
-  const attention = useMemo(() => {
-    return (data?.attention ?? []).reduce((map, item) => {
-      map[item.name] = item;
-      return map;
-    }, {});
-  }, [data]);
+  const attention = data?.attention ?? {};
 
   const goalStatus = data?.goalStatus?.status ?? 'on_track';
 
+  async function handleGoalStatusChange(status) {
+    if (status === goalStatus || savingStatus) return;
+    setSavingStatus(true);
+    setGoalSaveError(false);
+    try {
+      const saved = await saveGoalStatus(status);
+      setData((current) => current
+        ? { ...current, goalStatus: { status: saved.status, label: saved.label } }
+        : current);
+    } catch {
+      setGoalSaveError(true);
+    } finally {
+      setSavingStatus(false);
+    }
+  }
+
   const identityText = useMemo(() => {
     if (!data) {
-      return 'Sprint identity details will appear here.';
+      return error || 'Loading the sprint.';
+    }
+    if (data.error) {
+      return `${data.error.message}${data.error.httpStatus === 404 ? ' HTTP 404.' : ''}`;
     }
 
     const name = data.sprint?.name ?? 'Sprint';
@@ -60,7 +76,7 @@ export function SprintHealth() {
     }
 
     return `${name} • Sprint dates are unavailable.`;
-  }, [data]);
+  }, [data, error]);
 
   const pointsText = useMemo(() => {
     if (!data) {
@@ -70,6 +86,7 @@ export function SprintHealth() {
     if (data.pageState === 'dates_unavailable') {
       return 'Sprint dates are unavailable.';
     }
+    if (data.error) return '';
 
     const points = data.pointsVersusTime ?? {};
     const label = points.label ?? 'On track';
@@ -77,7 +94,7 @@ export function SprintHealth() {
     const completedPercent = points.completedPercent ?? 0;
     const gapDisplay = points.gapDisplay ?? '0.0';
 
-    return `${label} — ${Number(elapsedPercent).toFixed(1)}% elapsed, ${Number(completedPercent).toFixed(1)}% complete, gap ${gapDisplay}`;
+    return `${label} — ${elapsedPercent}% elapsed, ${completedPercent}% complete, gap ${gapDisplay}`;
   }, [data]);
 
   const goalText = useMemo(() => {
@@ -108,19 +125,24 @@ export function SprintHealth() {
 
       <section className="region" aria-label="Sprint goal">
         <h2 className="region-title">Sprint goal</h2>
-        <GoalStatusFieldset value={goalStatus} />
+        <GoalStatusFieldset
+          value={goalStatus}
+          disabled={savingStatus}
+          onChange={handleGoalStatusChange}
+        />
+        {goalSaveError ? <p className="error-message">The goal status was not saved.</p> : null}
         <p className="placeholder">{goalText}</p>
       </section>
 
-      {Object.entries(attentionLabels).map(([key, title]) => (
+      {!data || data.attention ? Object.entries(attentionLabels).map(([key, title]) => (
         <AttentionList
           key={key}
           title={title}
           count={attention[key]?.count ?? 0}
           rows={attention[key]?.rows ?? []}
-          placeholder={error ? 'No issues yet.' : `${title} issues will appear here.`}
+          placeholder={data || error ? 'Nothing needs attention.' : 'Loading the sprint.'}
         />
-      ))}
+      )) : null}
     </main>
   );
 }

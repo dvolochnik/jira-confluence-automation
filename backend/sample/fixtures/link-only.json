@@ -1,0 +1,6 @@
+{
+  "name": "Link Only Fixture",
+  "issues": [
+    { "key": "LINK-1", "type": "Bug", "statusName": "In Progress", "statusCategory": "In Progress", "points": 1, "blockedByKeys": ["LINK-2"] }
+  ]
+}
